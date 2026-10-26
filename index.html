@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d1b">
+<meta name="description" content="ChronoFlow: free online alarm clock, timer, stopwatch and focus tool.">
+<title>ChronoFlow — Smart Time Studio</title>
+<style>
+:root{--bg:#080d1b;--panel:#111a2d;--panel2:#17223a;--text:#f4f6ff;--muted:#a0aec9;--line:#2a3854;--blue:#7180ff;--cyan:#54e5d1;--red:#ff6b82}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top left,#27346b66,transparent 40%),var(--bg);color:var(--text);font:15px system-ui,Arial,sans-serif}
+body.light{--bg:#f3f6ff;--panel:#fff;--panel2:#edf1ff;--text:#18213b;--muted:#64718c;--line:#dce3f4;background:var(--bg)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+a{color:inherit}
+.wrap{max-width:1120px;margin:auto;padding:0 18px 40px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:22px 0;border-bottom:1px solid var(--line)}
+.brand{font-size:21px;font-weight:850;letter-spacing:-.5px}
+.brand span{color:var(--cyan)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn,.tab{border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--text);padding:11px 14px}
+.btn:hover,.tab:hover{border-color:var(--blue)}
+.primary{background:linear-gradient(120deg,#687aff,#8c5ae9);color:white;border:0;font-weight:750}
+.hero{padding:35px 0 22px}
+.eyebrow{color:var(--cyan);font-size:11px;letter-spacing:2px;font-weight:800}
+h1{font-size:clamp(32px,6vw,50px);letter-spacing:-2px;margin:10px 0}
+.gradient{background:linear-gradient(100deg,#99a6ff,var(--cyan));color:transparent;background-clip:text}
+p{line-height:1.7}
+.muted{color:var(--muted)}
+.clock-card,.card{background:linear-gradient(130deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:20px;padding:24px}
+.clock-card{display:grid;grid-template-columns:1.5fr 1fr;align-items:center;gap:20px}
+.bigclock{font-size:clamp(48px,9vw,82px);font-weight:800;letter-spacing:-3px;font-variant-numeric:tabular-nums}
+.bigclock span{color:var(--cyan)}
+.tabs{display:flex;gap:8px;overflow:auto;padding:22px 0}
+.tab{white-space:nowrap;color:var(--muted)}
+.tab.active{background:var(--blue);color:white}
+.view{display:none}
+.view.active{display:block;animation:up .25s ease}
+@keyframes up{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0 18px}
+.heading h2{margin:0}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:16px;align-items:start}
+.list{display:grid;gap:10px}
+.alarm{display:flex;align-items:center;gap:12px;padding:16px;border:1px solid var(--line);border-radius:15px;background:var(--panel)}
+.atime{font-size:25px;font-weight:800;min-width:95px}
+.ainfo{flex:1;min-width:0}
+.ainfo small{display:block;color:var(--muted);margin-top:4px}
+.alarm-actions{display:flex;gap:6px;align-items:center}
+.switch{accent-color:var(--blue);width:19px;height:19px}
+.field{display:grid;gap:7px;margin:12px 0}
+.field label{font-size:12px;color:var(--muted)}
+.field input,.field select{width:100%;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text)}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.days label{border:1px solid var(--line);padding:7px;border-radius:9px;font-size:12px}
+.days input{accent-color:var(--blue)}
+.full{width:100%}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:15px}
+.quick button{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:13px 7px}
+.quick strong,.quick small{display:block}
+.quick small{color:var(--muted);margin-top:5px}
+.toolgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.center{text-align:center;padding:30px 12px}
+.timer{font-size:clamp(42px,8vw,70px);font-weight:850;letter-spacing:-2px;font-variant-numeric:tabular-nums;margin:20px 0}
+.controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.laps{margin-top:18px;text-align:left}
+.laps div{display:flex;justify-content:space-between;padding:9px;border-bottom:1px solid var(--line)}
+.ad-slot{margin:20px 0;padding:12px;min-height:105px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;border:1px dashed var(--line);border-radius:13px;text-align:center;background:var(--panel)}
+.ad-label{font-size:10px;letter-spacing:1.8px;color:var(--muted);text-transform:uppercase}
+.ad-content{width:100%;display:grid;place-items:center;min-height:60px;color:var(--muted);font-size:12px}
+.ad-content:empty{display:none}
+.notice{border:1px solid #54e5d144;padding:13px;border-radius:12px;color:var(--muted);font-size:12px;line-height:1.7}
+footer{border-top:1px solid var(--line);margin-top:35px;padding-top:24px;color:var(--muted);font-size:13px}
+footer nav{display:flex;flex-wrap:wrap;gap:15px;margin-top:10px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:13px 18px;border-radius:12px;display:none;z-index:10;max-width:90%}
+.toast.show{display:block}
+.modal{display:none;position:fixed;inset:0;background:#000b;z-index:20;place-items:center;padding:18px}
+.modal.show{display:grid}
+.modalbox{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px;text-align:center;width:min(400px,100%)}
+.modalbox h2{font-size:28px}
+@media(max-width:760px){.clock-card,.grid,.toolgrid{grid-template-columns:1fr}.quick{grid-template-columns:repeat(2,1fr)}.atime{min-width:82px;font-size:22px}.clock-card{padding:18px}}
+@media(max-width:430px){.wrap{padding:0 12px 30px}.brand{font-size:17px}.clock-card,.card{padding:16px}.alarm{flex-wrap:wrap}.alarm-actions{margin-left:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a href="#home" class="brand" style="text-decoration:none">◷ Chrono<span>Flow</span></a>
+  <div class="actions">
+    <button class="btn" id="theme">☀️ Theme</button>
+    <button class="btn" id="enableNotify">🔔 Alerts</button>
+  </div>
+</header>
+
+<main id="home">
+<section class="hero">
+  <div class="eyebrow">YOUR TIME. YOUR RULES.</div>
+  <h1>Make every second <span class="gradient">count.</span></h1>
+  <p class="muted">Smart alarms, countdown timers, stopwatch and focused work — all in one place.</p>
+</section>
+
+<section class="clock-card">
+  <div>
+    <div class="eyebrow">YOUR LOCAL TIME</div>
+    <div class="bigclock" id="clock">--:--<span>:--</span></div>
+    <div class="muted" id="date"></div>
+  </div>
+  <div>
+    <h3>Make today count ✨</h3>
+    <p class="muted">Small steps every day create meaningful progress.</p>
+    <button class="btn primary" id="jumpAlarm">＋ Create alarm</button>
+  </div>
+</section>
+
+<!-- AD SLOT 1: Top banner below live clock. Paste your Adsterra banner code in this slot. -->
+<div class="ad-slot"><div class="ad-label">Advertisement · Slot 1 · Top banner</div><div class="ad-content" id="ad1">Paste Adsterra banner code here (replace this placeholder).</div></div>
+
+<nav class="tabs">
+  <button class="tab active" data-view="alarms">◷ Alarms</button>
+  <button class="tab" data-view="timer">◴ Timer</button>
+  <button class="tab" data-view="stopwatch">⏱ Stopwatch</button>
+  <button class="tab" data-view="focus">✦ Focus</button>
+  <button class="tab" data-view="settings">⚙ Settings</button>
+</nav>
+
+<section class="view active" id="view-alarms">
+  <div class="heading"><div><h2>Your alarms</h2><p class="muted">Set a reminder and keep your day on track.</p></div><button class="btn" id="testSound">▶ Test sound</button></div>
+
+  <!-- AD SLOT 2: Native banner below the alarm heading. -->
+  <div class="ad-slot"><div class="ad-label">Advertisement · Slot 2 · Native banner</div><div class="ad-content" id="ad2">Paste Adsterra native banner code here.</div></div>
+
+  <div class="quick">
+    <button data-quick="5"><strong>+5 min</strong><small>Reminder</small></button>
+    <button data-quick="10"><strong>+10 min</strong><small>Short break</small></button>
+    <button data-quick="25"><strong>+25 min</strong><small>Focus time</small></button>
+    <button data-quick="60"><strong>+1 hour</strong><small>Hourly reminder</small></button>
+  </div>
+
+  <!-- AD SLOT 3: Banner below quick reminder buttons. -->
+  <div class="ad-slot"><div class="ad-label">Advertisement · Slot 3 · Banner</div><div class="ad-content" id="ad3">Paste Adsterra banner code here.</div></div>
+
+  <div class="grid">
+    <div>
+      <div class="list" id="alarmList"></div>
+      <p class="notice">Keep this page open for alarms. Browser and device restrictions can prevent alarms when the page is closed or the device sleeps.</p>
+    </div>
+    <form class="card" id="alarmForm">
+      <h3 id="formHeading">＋ New alarm</h3>
+      <div class="field"><label for="alarmTime">ALARM TIME</label><input type="time" id="alarmTime" required></div>
+      <div class="field"><label for="alarmLabel">LABEL</label><input id="alarmLabel" maxlength="70" placeholder="Morning workout"></div>
+      <div class="field"><label>REPEAT DAYS</label><div class="days" id="days">
+        <label><input type="checkbox" value="1"> Mon</label><label><input type="checkbox" value="2"> Tue</label>
+        <label><input type="checkbox" value="3"> Wed</label><label><input type="checkbox" value="4"> Thu</label>
+        <label><input type="checkbox" value="5"> Fri</label><label><input type="checkbox" value="6"> Sat</label>
+        <label><input type="checkbox" value="0"> Sun</label>
+      </div></div>
+      <div class="field"><label for="tone">ALARM SOUND</label><select id="tone"><option value="sine">Gentle chime</option><option value="square">Digital beep</option></select></div>
+      <button class="btn primary full" type="submit" id="saveAlarm">Save alarm</button>
+      <button class="btn full" type="button" id="cancelEdit" style="display:none;margin-top:8px">Cancel edit</button>
+    </form>
+  </div>
+
+  <!-- AD SLOT 4: Native/banner ad after the alarm list and form. -->
+  <div class="ad-slot"><div class="ad-label">Advertisement · Slot 4 · Native/banner</div><div class="ad-content" id="ad4">Paste a separate Adsterra ad unit code here.</div></div>
+</section>
+
+<section class="view" id="view-timer">
+  <div class="heading"><div><h2>Countdown timer</h2><p class="muted">Choose a duration and start your countdown.</p></div></div>
+  <div class="toolgrid">
+    <div class="card center"><div class="eyebrow">TIME REMAINING</div><div class="timer" id="timerDisplay">05:00</div><div class="controls"><button class="btn primary" id="timerStart">▶ Start</button><button class="btn" id="timerReset">↺ Reset</button></div></div>
+    <div class="card"><h3>Set duration</h3>
+      <div class="field"><label>HOURS</label><input type="number" id="th" min="0" max="99" value="0"></div>
+      <div class="field"><label>MINUTES</label><input type="number" id="tm" min="0" max="59" value="5"></div>
+      <div class="field"><label>SECONDS</label><input type="number" id="ts" min="0" max="59" value="0"></div>
+      <div class="controls"><button class="btn" data-timer="60">1 min</button><button class="btn" data-timer="300">5 min</button><button class="btn" data-timer="1500">25 min</button></div>
+    </div>
+  </div>
+
+  <!-- AD SLOT 5: Banner after the timer controls. -->
+  <div class="ad-slot"><div class="ad-label">Advertisement · Slot 5 · Banner</div><div class="ad-content" id="ad5">Paste Adsterra banner code here.</div></div>
+</section>
+
+<section class="view" id="view-stopwatch">
+  <div class="heading"><div><h2>Stopwatch</h2><p class="muted">Track elapsed time and laps.</p></div></div>
+  <div class="card center"><div class="eyebrow">PRECISION MODE</div><div class="timer" id="swDisplay">00:00.00</div>
+    <div class="controls"><button class="btn primary" id="swStart">▶ Start</button><button class="btn" id="swLap" disabled>＋ Lap</button><button class="btn" id="swReset">↺ Reset</button></div><div class="laps" id="laps"></div>
+  </div>
+
+  <!-- AD SLOT 6: Native banner below stopwatch. -->
+  <div class="ad-slot"><div class="ad-label">Advertisement · Slot 6 · Native banner</div><div class="ad-content" id="ad6">Paste Adsterra native banner code here.</div></div>
+</section>
+
+<section class="view" id="view-focus">
+  <div class="heading"><div><h2>Focus mode</h2><p class="muted">Work in sessions, then take a break.</p></div></div>
+  <div class="toolgrid">
+    <div class="card center"><div class="eyebrow" id="focusPhase">FOCUS SESSION</div><div class="timer" id="focusDisplay">25:00</div><div class="controls"><button class="btn primary" id="focusStart">▶ Start focus</button><button class="btn" id="focusReset">↺ Reset</button><button class="btn" id="focusSkip">Skip →</button></div></div>
+    <div class="card"><h3>Your plan</h3><div class="field"><label>FOCUS DURATION</label><select id="focusMinutes"><option value="15">15 minutes</option><option value="25" selected>25 minutes</option><option value="45">45 minutes</option><option value="50">50 minutes</option></select></div><div class="field"><label>BREAK DURATION</label><select id="breakMinutes"><option value="5" selected>5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option></select></div><p class="muted">Silence distractions, work on one task, and take regular breaks.</p></div>
+  </div>
+
+  <!-- AD SLOT 7: Banner after focus mode. -->
+  <div class="ad-slot"><div class="ad-label">Advertisement · Slot 7 · Banner</div><div class="ad-content" id="ad7">Paste Adsterra banner code here.</div></div>
+</section>
+
+<section class="view" id="view-settings">
+  <div class="heading"><div><h2>Settings</h2><p class="muted">Manage your preferences.</p></div></div>
+  <div class="card">
+    <p><label><input type="checkbox" id="soundSetting" checked> Enable alarm sound</label></p>
+    <p><label><input type="checkbox" id="formatSetting"> Use 24-hour clock</label></p>
+    <p><label><input type="checkbox" id="darkSetting" checked> Dark theme</label></p>
+    <button class="btn" id="notifySetting">Enable browser notifications</button>
+    <button class="btn" id="clearAlarms" style="margin-left:8px">Clear all alarms</button>
+  </div>
+</section>
+
+<!-- AD SLOT 8: Native ad inside informational content. -->
+<section class="card" style="margin-top:24px">
+  <h2>About ChronoFlow</h2>
+  <p class="muted">ChronoFlow brings online alarms, countdown timers, a stopwatch and focus sessions together in one simple workspace. Your alarms and preferences are stored locally in this browser.</p>
+  <div class="ad-slot"><div class="ad-label">Advertisement · Slot 8 · Native banner</div><div class="ad-content" id="ad8">Paste Adsterra native ad code here.</div></div>
+  <h3>Privacy</h3>
+  <p class="muted">This version stores alarm and preference data in your browser. If you add advertising or analytics providers, update this policy to explain the actual data practices and third-party services used.</p>
+  <h3>Terms of use</h3>
+  <p class="muted">Do not rely on this browser tool as the sole method for emergency, medical or other safety-critical reminders. Device and browser restrictions may interrupt timers and alarms.</p>
+  <h3>Contact</h3>
+  <p class="muted">Replace the example address with your real support email: <a href="mailto:your-email@example.com">your-email@example.com</a></p>
+</section>
+
+<!-- AD SLOT 9: Banner immediately above the footer. -->
+<div class="ad-slot"><div class="ad-label">Advertisement · Slot 9 · Footer banner</div><div class="ad-content" id="ad9">Paste Adsterra banner code here.</div></div>
+
+<!-- SLOT 10: Optional promotional Smartlink button.
+     Replace the example URL with your actual Adsterra Smartlink.
+     Keep this separate from alarm/timer controls. -->
+<div class="card" style="text-align:center;margin-top:18px">
+  <div class="eyebrow">SPONSORED</div>
+  <h3>Discover something new</h3>
+  <p class="muted">Optional sponsored link. Opens separately from the time tools.</p>
+  <a class="btn primary" id="smartLinkButton" href="#" target="_blank" rel="nofollow sponsored noopener">Explore sponsored offer ↗</a>
+  <p class="muted" style="font-size:11px">Replace the link in the code with your own Adsterra Smartlink. Do not use this button to mislead visitors.</p>
+</div>
+
+<footer>
+  <strong>ChronoFlow</strong> · Make time work for you.
+  <p>© <span id="year"></span> ChronoFlow</p>
+  <nav><a href="#home">Home</a><a href="#about">About</a><a href="#privacy">Privacy</a><a href="#terms">Terms</a><a href="#contact">Contact</a></nav>
+</footer>
+</main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modalbox"><div style="font-size:42px">🔔</div><h2 id="modalTitle">Time's up!</h2><p id="modalText" class="muted">Your reminder is ready.</p><div class="controls"><button class="btn primary" id="dismiss">Dismiss</button><button class="btn" id="snooze">Snooze 5 min</button></div></div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const get=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
+let alarms=get("cf_alarms",[]), prefs=Object.assign({sound:true,format24:false,dark:true},get("cf_prefs",{}));
+let editId=null, audio=null, activeRing=null, ringInterval=null;
+function save(){localStorage.setItem("cf_alarms",JSON.stringify(alarms))}
+function savePrefs(){localStorage.setItem("cf_prefs",JSON.stringify(prefs))}
+function toast(s){const e=$("#toast");e.textContent=s;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2500)}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function timeString(d,seconds=false){return d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:seconds?"2-digit":undefined,hour12:!prefs.format24})}
+function tickClock(){const d=new Date();$("#clock").innerHTML=esc(timeString(d,true).replace(/:\d{2}$/, ""))+'<span>:'+String(d.getSeconds()).padStart(2,"0")+'</span>';$("#date").textContent=d.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});$("#year").textContent=d.getFullYear()}
+setInterval(tickClock,250);tickClock();
+function applyPrefs(){document.body.classList.toggle("light",!prefs.dark);$("#soundSetting").checked=prefs.sound;$("#formatSetting").checked=prefs.format24;$("#darkSetting").checked=prefs.dark;tickClock();renderAlarms()}
+$("#theme").onclick=()=>{prefs.dark=!prefs.dark;savePrefs();applyPrefs()};
+$("#soundSetting").onchange=e=>{prefs.sound=e.target.checked;savePrefs()};
+$("#formatSetting").onchange=e=>{prefs.format24=e.target.checked;savePrefs();applyPrefs()};
+$("#darkSetting").onchange=e=>{prefs.dark=e.target.checked;savePrefs();applyPrefs()};
+$("#jumpAlarm").onclick=()=>{$('[data-view="alarms"]').click();$("#alarmTime").focus()};
+$$(".tab").forEach(b=>b.onclick=()=>{$$(".tab").forEach(t=>t.classList.toggle("active",t===b));$$(".view").forEach(v=>v.classList.toggle("active",v.id==="view-"+b.dataset.view))});
+function selectedDays(){return $$("#days input:checked").map(x=>+x.value)}
+function dayText(days){if(!days.length)return "Once";if(days.length===7)return "Every day";return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].filter((_,i)=>days.includes(i)).join(", ")}
+function resetForm(){editId=null;$("#alarmForm").reset();$("#formHeading").textContent="＋ New alarm";$("#saveAlarm").textContent="Save alarm";$("#cancelEdit").style.display="none";const d=new Date(Date.now()+300000);$("#alarmTime").value=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
+function renderAlarms(){const el=$("#alarmList");if(!alarms.length){el.innerHTML='<div class="card muted">No alarms yet. Create your first alarm.</div>';return}el.innerHTML=[...alarms].sort((a,b)=>a.time.localeCompare(b.time)).map(a=>{const [h,m]=a.time.split(":").map(Number);const d=new Date();d.setHours(h,m,0,0);return `<div class="alarm"><div class="atime">${esc(timeString(d))}</div><div class="ainfo"><strong>${esc(a.label||"My alarm")}</strong><small>${esc(dayText(a.days||[]))}</small></div><div class="alarm-actions"><input class="switch toggleAlarm" type="checkbox" aria-label="Enable alarm" data-id="${esc(a.id)}" ${a.enabled?"checked":""}><button class="btn edit" data-id="${esc(a.id)}" aria-label="Edit alarm">✎</button><button class="btn delete" data-id="${esc(a.id)}" aria-label="Delete alarm">×</button></div></div>`}).join("")}
+$("#alarmForm").onsubmit=e=>{e.preventDefault();const item={id:editId||id(),time:$("#alarmTime").value,label:$("#alarmLabel").value.trim()||"My alarm",days:selectedDays(),tone:$("#tone").value,enabled:true,last:""};if(!item.time)return;alarms=editId?alarms.map(a=>a.id===editId?item:a):[...alarms,item];save();renderAlarms();resetForm();toast("Alarm saved")};
+$("#cancelEdit").onclick=resetForm;
+$("#alarmList").onclick=e=>{const b=e.target.closest("button");if(!b)return;const a=alarms.find(x=>x.id===b.dataset.id);if(!a)return;if(b.classList.contains("delete")){alarms=alarms.filter(x=>x.id!==a.id);save();renderAlarms();toast("Alarm deleted")}if(b.classList.contains("edit")){editId=a.id;$("#alarmTime").value=a.time;$("#alarmLabel").value=a.label;$("#tone").value=a.tone||"sine";$$("#days input").forEach(x=>x.checked=(a.days||[]).includes(+x.value));$("#formHeading").textContent="Edit alarm";$("#saveAlarm").textContent="Update alarm";$("#cancelEdit").style.display="block"}};
+$("#alarmList").onchange=e=>{if(!e.target.matches(".toggleAlarm"))return;const a=alarms.find(x=>x.id===e.target.dataset.id);if(a){a.enabled=e.target.checked;save()}};
+async function playTone(tone="sine"){if(!prefs.sound)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!audio)audio=new AC();if(audio.state==="suspended")await audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.type=tone;o.frequency.value=tone==="square"?850:660;g.gain.value=.12;o.connect(g);g.connect(audio.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.65);o.stop(audio.currentTime+.7)}catch{}}
+function stopRinging(){clearInterval(ringInterval);ringInterval=null}
+function ring(title,text,canSnooze=true){activeRing={title,text};$("#modalTitle").textContent=title;$("#modalText").textContent=text;$("#snooze").style.display=canSnooze?"inline-block":"none";$("#modal").classList.add("show");stopRinging();playTone();ringInterval=setInterval(()=>playTone(),2000);if("Notification"in window&&Notification.permission==="granted"){try{new Notification(title,{body:text})}catch{}}}
+function checkAlarms(){const d=new Date(),t=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"),key=d.toDateString()+" "+t;for(const a of alarms){if(!a.enabled||a.time!==t||a.last===key||(a.days||[]).length&&!a.days.includes(d.getDay()))continue;a.last=key;if(!(a.days||[]).length)a.enabled=false;save();renderAlarms();ring(a.label||"Alarm", "Your scheduled reminder is due.");break}}
+setInterval(checkAlarms,1000);
+$("#dismiss").onclick=()=>{$("#modal").classList.remove("show");stopRinging();activeRing=null};
+$("#snooze").onclick=()=>{const old=activeRing;$("#modal").classList.remove("show");stopRinging();activeRing=null;if(old){const d=new Date(Date.now()+300000);alarms.push({id:id(),time:String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"),label:old.title+" (Snoozed)",days:[],tone:"sine",enabled:true,last:""});save();renderAlarms();toast("Snoozed for 5 minutes")}};
+$("#testSound").onclick=()=>playTone();
+$$("[data-quick]").forEach(b=>b.onclick=()=>{const d=new Date(Date.now()+(+b.dataset.quick)*60000);alarms.push({id:id(),time:String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"),label:"Quick reminder",days:[],tone:"sine",enabled:true,last:""});save();renderAlarms();toast("Quick reminder added")});
+async function askNotify(){if(!("Notification"in window))return toast("Notifications not supported");const p=await Notification.requestPermission();toast(p==="granted"?"Notifications enabled":"Permission not granted")}
+$("#enableNotify").onclick=askNotify;$("#notifySetting").onclick=askNotify;
+
+/* Countdown timer */
+let timer={run:false,end:0,left:300,total:300};
+function duration(){return Math.max(0,Math.min(99,+$("#th").value||0))*3600+Math.max(0,Math.min(59,+$("#tm").value||0))*60+Math.max(0,Math.min(59,+$("#ts").value||0)}
+function fmt(s,cs=false){s=Math.max(0,s);let h=Math.floor(s/3600),m=Math.floor(s%3600/60),sec=Math.floor(s%60);return (h?String(h).padStart(2,"0")+":":"")+String(m).padStart(2,"0")+":"+String(sec).padStart(2,"0")+(cs?"."+String(Math.floor(s%1*100)).padStart(2,"0"):"")}
+function drawTimer(){let left=timer.run?Math.max(0,(timer.end-Date.now())/1000):timer.left;$("#timerDisplay").textContent=fmt(left);$("#timerStart").textContent=timer.run?"Ⅱ Pause":left<timer.total&&left>0?"▶ Resume":"▶ Start"}
+function resetTimer(){timer={run:false,end:0,left:duration(),total:duration()};drawTimer()}
+$("#timerStart").onclick=()=>{if(timer.run){timer.left=Math.max(0,(timer.end-Date.now())/1000);timer.run=false}else{if(timer.left<=0)resetTimer();if(timer.left<=0)return toast("Set a duration first");timer.end=Date.now()+timer.left*1000;timer.run=true}drawTimer()};
+$("#timerReset").onclick=resetTimer;["th","tm","ts"].forEach(id=>$("#"+id).onchange=()=>{if(!timer.run)resetTimer()});
+$$("[data-timer]").forEach(b=>b.onclick=()=>{$("#th").value=Math.floor(+b.dataset.timer/3600);$("#tm").value=Math.floor(+b.dataset.timer%3600/60);$("#ts").value=+b.dataset.timer%60;resetTimer()});
+setInterval(()=>{if(timer.run){timer.left=Math.max(0,(timer.end-Date.now())/1000);if(timer.left<=0){timer.run=false;drawTimer();ring("Timer complete!","Your countdown has finished.",false)}else drawTimer()}},150);
+
+/* Stopwatch */
+let sw={run:false,start:0,elapsed:0,laps:[]};
+function swms(){return sw.elapsed+(sw.run?Date.now()-sw.start:0)}
+function drawSW(){const ms=swms();$("#swDisplay").textContent=fmt(ms/1000,true);$("#swStart").textContent=sw.run?"Ⅱ Pause":ms?"▶ Resume":"▶ Start";$("#swLap").disabled=!sw.run;$("#laps").innerHTML=sw.laps.map((x,i)=>`<div><span>Lap ${sw.laps.length-i}</span><strong>${esc(fmt(x/1000,true))}</strong></div>`).join("")}
+$("#swStart").onclick=()=>{if(sw.run){sw.elapsed+=Date.now()-sw.start;sw.run=false}else{sw.start=Date.now();sw.run=true}drawSW()};
+$("#swLap").onclick=()=>{if(sw.run){sw.laps.unshift(swms());drawSW()}};
+$("#swReset").onclick=()=>{sw={run:false,start:0,elapsed:0,laps:[]};drawSW()};
+setInterval(()=>{if(sw.run)drawSW()},40);
+
+/* Focus timer */
+let focus={run:false,phase:"focus",end:0,left:1500,total:1500};
+function focusLength(){return (+$("#focusMinutes").value||25)*60}
+function breakLength(){return (+$("#breakMinutes").value||5)*60}
+function resetFocus(){focus={run:false,phase:"focus",end:0,left:focusLength(),total:focusLength()};drawFocus()}
+function drawFocus(){let left=focus.run?Math.max(0,(focus.end-Date.now())/1000):focus.left;$("#focusDisplay").textContent=fmt(left);$("#focusPhase").textContent=focus.phase==="focus"?"FOCUS SESSION":"BREAK TIME";$("#focusStart").textContent=focus.run?"Ⅱ Pause":"▶ Start "+focus.phase}
+function skipFocus(){focus.phase=focus.phase==="focus"?"break":"focus";focus.run=false;focus.left=focus.phase==="focus"?focusLength():breakLength();focus.total=focus.left;drawFocus();ring(focus.phase==="break"?"Focus complete!":"Break finished!",focus.phase==="break"?"Take a short break.":"Ready for another focus session?",false)}
+$("#focusStart").onclick=()=>{if(focus.run){focus.left=Math.max(0,(focus.end-Date.now())/1000);focus.run=false}else{if(focus.left<=0)resetFocus();focus.end=Date.now()+focus.left*1000;focus.run=true}drawFocus()};
+$("#focusReset").onclick=resetFocus;$("#focusSkip").onclick=skipFocus;
+$("#focusMinutes").onchange=()=>{if(!focus.run&&focus.phase==="focus")resetFocus()};
+$("#breakMinutes").onchange=()=>{if(!focus.run&&focus.phase==="break")resetFocus()};
+setInterval(()=>{if(focus.run){focus.left=Math.max(0,(focus.end-Date.now())/1000);if(focus.left<=0)skipFocus();else drawFocus()}},200);
+
+$("#clearAlarms").onclick=()=>{if(confirm("Delete all saved alarms?")){alarms=[];save();renderAlarms();resetForm();toast("All alarms cleared")}};
+$("#smartLinkButton").onclick=e=>{if(e.currentTarget.getAttribute("href")==="#"){e.preventDefault();toast("Add your Adsterra Smartlink URL to the code first")}};
+
+applyPrefs();renderAlarms();resetForm();resetTimer();drawSW();resetFocus();
+</script>
+</body>
+</html>
